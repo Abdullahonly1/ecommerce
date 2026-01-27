@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Stock Bot - MyShop</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f2f5; margin: 0; font-family: Arial, sans-serif; }
+        .chat-container {
+            max-width: 700px;
+            height: 100vh;
+            margin: 0 auto;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .chat-header {
+            background: #ff69b4;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            margin: 8px 0;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 75%;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .message.user {
+            background: #dcf8c6;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .message.bot {
+            background: white;
+            align-self: flex-start;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-footer {
+            padding: 10px 15px;
+            background: #f0f2f5;
+            border-top: 1px solid #ddd;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+        }
+        .btn-send {
+            background: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        Chat with Stock Bot
+    </div>
+
+    <div id="chat-messages" class="chat-body">
+        <div class="message bot">হাই! 👋 কোনো প্রোডাক্টের স্টক জানতে চাইলে বলুন (যেমন: Summer Dress আছে কি?)</div>
+    </div>
+
+    <div class="chat-footer">
+        <div class="input-group">
+            <input type="text" id="message" class="chat-input" placeholder="প্রোডাক্টের নাম লিখুন..." autofocus>
+            <button onclick="sendMessage()" class="btn-send">➤</button>
+        </div>
+    </div>
+</div>
+
+<!-- WebJars লিঙ্ক (এগুলো ঠিক আছে) -->
+<script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.3-1/stomp.min.js"></script>
+
+<script>
+    var socket = new SockJS('/ws');
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('WebSocket Connected Successfully:', frame);
+        showMessage("কানেকশন সফল! এখন প্রোডাক্টের স্টক জিজ্ঞাসা করুন।", 'bot');
+
+        stompClient.subscribe('/topic/chat', function (response) {
+            var message = response.body;
+            console.log('Bot Reply Received:', message);
+            showMessage(message, 'bot');
+        });
+    }, function (error) {
+        console.error('Connection error:', error);
+        showMessage("কানেকশন হারিয়েছে। পেজ রিফ্রেশ করুন।", 'bot');
+    });
+
+    function sendMessage() {
+        var input = document.getElementById('message');
+        var message = input.value.trim();
+
+        if (!message) return;
+
+        console.log('Sending message:', message);
+
+        // তোমার মেসেজ তৎক্ষণাৎ দেখাও
+        showMessage(message, 'user');
+
+        if (stompClient && stompClient.connected) {
+            stompClient.send("/app/chat", {}, message);
+        } else {
+            showMessage("কানেকশন হচ্ছে... দয়া করে অপেক্ষা করুন।", 'bot');
+        }
+
+        input.value = '';
+    }
+
+    function showMessage(text, sender) {
+        var chat = document.getElementById('chat-messages');
+        var msgDiv = document.createElement('div');
+        msgDiv.className = 'message ' + sender;
+        msgDiv.textContent = text;
+        chat.appendChild(msgDiv);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    document.getElementById('message').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+</script>
+
+</body>
+</html>

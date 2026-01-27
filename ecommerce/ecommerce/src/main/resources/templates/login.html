@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MyShop</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #fff5f8, #ffeef5, #fff0f5);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-card {
+            max-width: 420px;
+            margin: 40px auto;
+            padding: 2.5rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(255,105,180,0.15);
+            border: 1px solid rgba(255,105,180,0.1);
+        }
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+        }
+        .btn-pink {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.9rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        .btn-pink:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255,105,180,0.4);
+        }
+        .btn-pink:disabled {
+            background: #ff69b4;
+            opacity: 0.7;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 0.75rem 1.2rem;
+            border: 1px solid #ff69b4;
+        }
+        .form-control:focus {
+            border-color: #ff1493;
+            box-shadow: 0 0 0 0.25rem rgba(255,105,180,0.25);
+        }
+        .text-pink {
+            color: #ff1493;
+        }
+        .alert {
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .input-group-text {
+            background: #fff0f5;
+            border: 1px solid #ff69b4;
+            border-radius: 10px 0 0 10px;
+        }
+        .forgot-link {
+            color: #ff69b4;
+            text-decoration: none;
+        }
+        .forgot-link:hover {
+            color: #ff1493;
+            text-decoration: underline;
+        }
+        .spinner {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="login-card text-center">
+        <div class="logo">MyShop</div>
+        <h4 class="mb-4 text-muted">Sign in to your account</h4>
+
+        <!-- Error Message -->
+        <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Invalid username or password. Please try again.
+        </div>
+
+        <!-- Success/Logout Message -->
+        <div th:if="${param.logout}" class="alert alert-success d-flex align-items-center">
+            <i class="fas fa-check-circle me-2"></i>
+            You have been logged out successfully.
+        </div>
+
+        <!-- Login Form -->
+        <form th:action="@{/login}" method="post" id="loginForm">
+            <!-- Hidden nextUrl – এটা খুব জরুরি -->
+            <input type="hidden" name="nextUrl" th:value="${param.nextUrl != null ? param.nextUrl : ''}" />
+
+            <div class="mb-3 input-group">
+                <span class="input-group-text"><i class="fas fa-user text-pink"></i></span>
+                <input type="text" id="username" name="username" class="form-control" required autofocus placeholder="Username">
+            </div>
+
+            <div class="mb-4 input-group">
+                <span class="input-group-text"><i class="fas fa-lock text-pink"></i></span>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="Password">
+            </div>
+
+            <button type="submit" class="btn btn-pink btn-lg w-100 fw-bold" id="loginBtn">
+                <span class="spinner-border spinner-border-sm spinner me-2" role="status" aria-hidden="true"></span>
+                Login
+            </button>
+        </form>
+
+        <div class="mt-4">
+            <p><a href="#" class="forgot-link small">Forgot your password?</a></p>
+            <p>Don't have an account? <a href="/register" class="text-pink fw-bold">Register Now</a></p>
+        </div>
+    </div>
+</div>
+
+<script src="/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+<!-- Login button loading animation -->
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('loginBtn');
+        const spinner = btn.querySelector('.spinner');
+        btn.disabled = true;
+        spinner.style.display = 'inline-block';
+        btn.innerHTML = 'Logging in...';
+    });
+</script>
+
+</body>
+</html>

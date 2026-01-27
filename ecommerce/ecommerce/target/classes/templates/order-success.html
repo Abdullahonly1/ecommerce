@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Successful - MyShop</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #fff5f8, #ffeef5, #fff0f5);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, #ff69b4, #ff1493) !important;
+            box-shadow: 0 8px 30px rgba(255,105,180,0.4);
+            padding: 1.4rem 0;
+        }
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 2.5rem;
+            color: white !important;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+
+        .success-container {
+            max-width: 800px;
+            margin: 120px auto;
+            text-align: center;
+            padding: 4rem 2.5rem;
+            background: white;
+            border-radius: 36px;
+            box-shadow: 0 40px 100px rgba(255,105,180,0.18);
+        }
+
+        .success-icon {
+            font-size: 180px;
+            margin-bottom: 2rem;
+            color: #28a745;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-40px); }
+            60% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+        }
+
+        .lead {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 3rem;
+            font-weight: 500;
+            line-height: 1.7;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 2rem 0 3rem;
+        }
+
+        .btn-action {
+            font-weight: 700;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            transition: all 0.4s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary-action {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            border: none;
+            color: white;
+        }
+        .btn-primary-action:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(255,105,180,0.4);
+        }
+
+        .btn-secondary-action {
+            background: white;
+            color: #ff1493;
+            border: 2px solid #ff69b4;
+        }
+        .btn-secondary-action:hover {
+            background: #ff69b4;
+            color: white;
+            transform: translateY(-4px);
+        }
+
+        .extra-info {
+            font-size: 1.2rem;
+            color: #555;
+            line-height: 1.8;
+        }
+        .extra-info a {
+            color: #ff1493;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark shadow">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" href="/">MyShop</a>
+    </div>
+</nav>
+
+<div class="container success-container">
+    <div class="success-icon">🎉</div>
+    <h1>অর্ডার সফলভাবে প্লেস হয়েছে!</h1>
+    <p class="lead text-muted mb-5" th:text="${message}">ধন্যবাদ আপনার ক্রয়ের জন্য! আমরা খুব শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
+
+    <div class="btn-group">
+        <a href="/" class="btn btn-action btn-primary-action btn-lg shadow fw-bold">
+            Continue Shopping
+        </a>
+        <a href="/orders" class="btn btn-action btn-secondary-action btn-lg shadow">
+            My Orders
+        </a>
+    </div>
+
+    <p class="extra-info mt-5">
+        অর্ডার নম্বর বা ট্র্যাকিং তথ্য শীঘ্রই ইমেইল করা হবে।<br>
+        কোনো প্রশ্ন থাকলে <a href="/contact">যোগাযোগ করুন</a>।
+    </p>
+</div>
+
+</body>
+</html>

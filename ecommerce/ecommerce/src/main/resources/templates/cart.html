@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - MyShop</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f9f9f9, #fff5f8);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #ff69b4, #ff1493) !important;
+            box-shadow: 0 4px 20px rgba(255,105,180,0.3);
+        }
+        .cart-empty-img {
+            max-height: 320px;
+            animation: fadeIn 1.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .cart-card {
+            transition: all 0.4s ease;
+            border: none;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .cart-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(255,105,180,0.25);
+        }
+        .btn-pink {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            border: none;
+            color: white;
+            transition: all 0.3s;
+            border-radius: 50px;
+            font-weight: 600;
+            padding: 0.8rem 2rem;
+        }
+        .btn-pink:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255,105,180,0.4);
+        }
+        .btn-pink:active {
+            animation: pulse 0.3s ease;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+        .text-pink { color: #ff69b4; }
+        .quantity-btn {
+            min-width: 50px;
+            font-weight: bold;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .quantity-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .remove-btn {
+            font-size: 0.95rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        .remove-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+        .stock-info {
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            display: inline-block;
+            animation: fadeIn 1s ease;
+        }
+        .stock-low { background: #fff3cd; color: #856404; }
+        .stock-out { background: #f8d7da; color: #721c24; }
+        .stock-ok { background: #d4edda; color: #155724; }
+        .order-summary {
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            background: white;
+            transition: all 0.3s;
+        }
+        .order-summary:hover {
+            box-shadow: 0 20px 50px rgba(255,105,180,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark shadow">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" href="/">MyShop</a>
+        <a class="btn btn-light rounded-pill px-4" href="/">Continue Shopping</a>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <h1 class="text-center mb-5 fw-bold text-pink animate__animated animate__fadeInDown">Your Shopping Cart</h1>
+
+    <!-- Empty Cart Message -->
+    <div th:if="${cartItems == null or #lists.isEmpty(cartItems)}" class="text-center py-5 animate__animated animate__fadeIn">
+        <img src="https://images.unsplash.com/photo-1593604352323-3c2dcee3f3d9?w=500"
+             class="img-fluid cart-empty-img rounded shadow mb-4" alt="Empty Cart">
+        <h3 class="text-muted mb-4">Your cart is currently empty!</h3>
+        <a href="/" class="btn btn-pink btn-lg rounded-pill px-5 shadow">Start Shopping</a>
+    </div>
+
+    <!-- Cart Items + Summary -->
+    <div th:if="${cartItems != null and !#lists.isEmpty(cartItems)}" class="row">
+        <!-- Cart Items List -->
+        <div class="col-lg-8">
+            <div th:each="item : ${cartItems}" th:if="${item != null}">
+                <div class="card cart-card mb-4 shadow-sm rounded-4 overflow-hidden animate__animated animate__fadeInUp">
+                    <div class="row g-0">
+                        <!-- Product Image -->
+                        <div class="col-md-4">
+                            <img th:src="${item.product != null and item.product.imageUrl != null ? item.product.imageUrl : '/images/placeholder.jpg'}"
+                                 class="img-fluid h-100" style="object-fit: cover;" alt="Product">
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="col-md-8">
+                            <div class="card-body d-flex flex-column justify-content-between h-100">
+                                <div>
+                                    <h5 class="fw-bold mb-2" th:text="${item.product != null ? item.product.name : 'Unknown Product'}">Product Name</h5>
+                                    <p class="text-muted mb-2">
+                                        Unit Price: <span class="fw-bold text-pink">৳ <span th:text="${item.price != null ? item.price : 0}">0</span></span>
+                                    </p>
+
+                                    <!-- স্টক দেখানোর লজিক -->
+                                    <p class="stock-info mb-3" th:if="${item.product != null}">
+                                        <span th:if="${item.product.stock <= 0}" class="stock-out px-3 py-1">Out of Stock</span>
+                                        <span th:if="${item.product.stock > 0 and item.product.stock <= 5}" class="stock-low px-3 py-1">Low Stock: <span th:text="${item.product.stock}">0</span> left</span>
+                                        <span th:if="${item.product.stock > 5}" class="stock-ok px-3 py-1">In Stock: <span th:text="${item.product.stock}">0</span> available</span>
+                                    </p>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-end mt-3">
+                                    <!-- Quantity Controls -->
+                                    <div class="d-flex align-items-center">
+                                        <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="d-inline">
+                                            <input type="hidden" name="quantity" th:value="${item.quantity != null ? item.quantity - 1 : 1}">
+                                            <button type="submit" class="btn btn-outline-pink quantity-btn btn-sm rounded-pill me-2"
+                                                    th:disabled="${item.quantity == null or item.quantity <= 1}">
+                                                -
+                                            </button>
+                                        </form>
+
+                                        <span class="mx-3 fw-bold fs-5" th:text="${item.quantity != null ? item.quantity : 1}">1</span>
+
+                                        <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="d-inline">
+                                            <input type="hidden" name="quantity" th:value="${item.quantity != null ? item.quantity + 1 : 1}">
+                                            <button type="submit" class="btn btn-outline-pink quantity-btn btn-sm rounded-pill ms-2">
+                                                +
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Total Price & Remove -->
+                                    <div class="text-end">
+                                        <p class="fs-5 fw-bold text-pink mb-2">
+                                            Total: ৳ <span th:text="${item.price != null and item.quantity != null ? item.price.multiply(item.quantity) : 0}">0</span>
+                                        </p>
+                                        <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger remove-btn btn-sm rounded-pill px-4">
+                                                Remove
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card order-summary shadow-sm sticky-top rounded-4 animate__animated animate__fadeInRight" style="top: 100px;">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-4 text-pink">Order Summary</h4>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total Items</span>
+                        <strong th:text="${cartItems != null ? #lists.size(cartItems) : 0}">0</strong>
+                    </div>
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-between mb-5">
+                        <h4 class="fw-bold">Grand Total</h4>
+                        <h4 class="text-pink fw-bold" th:text="'৳ ' + ${total != null ? total : 0}">৳ 0</h4>
+                    </div>
+                    <a th:href="@{/cart/checkout}" class="btn btn-pink btn-lg w-100 rounded-pill shadow fw-bold mb-3">
+                        Proceed to Checkout
+                    </a>
+                    <a href="/" class="btn btn-outline-pink w-100 rounded-pill">Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

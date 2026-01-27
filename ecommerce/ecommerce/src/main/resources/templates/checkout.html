@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - MyShop</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #fff5f8, #ffeef5);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #ff69b4, #ff1493) !important;
+            box-shadow: 0 6px 25px rgba(255,105,180,0.35);
+            padding: 1.2rem 0;
+        }
+        .navbar-brand { font-weight: 900; font-size: 2.1rem; color: white !important; }
+        h1 {
+            font-weight: 900;
+            color: #ff1493;
+            text-shadow: 0 2px 10px rgba(255,20,147,0.2);
+        }
+        .card {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            background: white;
+        }
+        .form-label { font-weight: 700; color: #444; }
+        .form-control, .form-check-input {
+            border-radius: 12px;
+            padding: 0.75rem 1.2rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            border-color: #ff69b4;
+            box-shadow: 0 0 0 0.25rem rgba(255,105,180,0.25);
+        }
+        .btn-pink {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            border: none;
+            font-weight: 700;
+            border-radius: 50px;
+            padding: 1rem 2.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(255,105,180,0.3);
+        }
+        .btn-pink:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 45px rgba(255,105,180,0.5);
+        }
+        .order-summary {
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            background: white;
+        }
+        .order-summary:hover {
+            box-shadow: 0 25px 60px rgba(255,105,180,0.25);
+        }
+        .alert-success {
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(40,167,69,0.2);
+        }
+        .summary-item {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark shadow">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" href="/">MyShop</a>
+        <a class="btn btn-light rounded-pill px-4 fw-bold" href="/cart">Back to Cart</a>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <h1 class="text-center mb-5 fw-bold text-pink">Checkout</h1>
+
+    <div class="row g-5">
+        <!-- Shipping Address Form -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm rounded-4 p-5">
+                <h4 class="fw-bold mb-4 text-center">Shipping Address</h4>
+                <form th:action="@{/cart/checkout}" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Name</label>
+                            <input type="text" class="form-control rounded-pill" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Phone Number</label>
+                            <input type="tel" class="form-control rounded-pill" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Full Address</label>
+                        <textarea class="form-control rounded-3" rows="3" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">City</label>
+                            <input type="text" class="form-control rounded-pill" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Area / Thana</label>
+                            <input type="text" class="form-control rounded-pill" required>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mt-4 mb-3">Payment Method</h5>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="payment" id="cod" checked>
+                        <label class="form-check-label fw-bold" for="cod">Cash on Delivery</label>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="radio" name="payment" id="bkash">
+                        <label class="form-check-label fw-bold" for="bkash">bKash / Nagad / Rocket (Coming Soon)</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-pink btn-lg w-100 rounded-pill shadow fw-bold mt-4">
+                        Place Order
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm rounded-4 sticky-top" style="top: 100px;">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4 text-pink">Order Summary</h4>
+
+                    <!-- Group Buy Discount -->
+                    <div th:if="${discountApplied}" class="alert alert-success mb-4 text-center">
+                        🎉 Group Buy Discount Applied!
+                        <br>You saved <strong>৳ <span th:text="${discountAmount} ?: 0">0</span></strong>
+                    </div>
+
+                    <!-- Cart Items / Group Buy Product -->
+                    <div class="mb-4">
+                        <!-- গ্রুপ বাই থেকে আসলে গ্রুপের প্রোডাক্ট দেখাও -->
+                        <div th:if="${groupBuy != null}">
+                            <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <img th:if="${groupBuy?.product?.imageUrl != null}"
+                                         th:src="${groupBuy.product.imageUrl}"
+                                         class="me-3 rounded"
+                                         style="width: 60px; height: 60px; object-fit: cover;"
+                                         alt="Product">
+                                    <div>
+                                        <h6 class="mb-1" th:text="${groupBuy?.product?.name} ?: 'Product Name'">Product Name</h6>
+                                        <small class="text-muted">Quantity: <strong th:text="${groupBuy?.requiredMembers} ?: 'N/A'">4</strong></small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <strong>৳ <span th:text="${groupBuy?.product?.price?.multiply(groupBuy?.requiredMembers)} ?: 0">0</span></strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- নরমাল কার্ট থেকে আসলে কার্ট আইটেম দেখাও -->
+                        <div th:if="${groupBuy == null}">
+                            <div th:if="${cartItems != null and !cartItems.isEmpty()}" th:each="item : ${cartItems}">
+                                <div class="d-flex justify-content-between mb-2 summary-item">
+                                    <span th:text="${item?.product?.name} + ' x ' + ${item?.quantity} ?: 'Item'">Product x 1</span>
+                                    <span class="fw-bold" th:text="'৳ ' + ${item?.totalPrice} ?: '৳ 0'">৳ 0</span>
+                                </div>
+                            </div>
+
+                            <!-- কার্ট খালি হলে মেসেজ -->
+                            <p th:if="${groupBuy == null and (cartItems == null or cartItems.isEmpty())}"
+                               class="text-center text-muted mb-0">
+                                Your cart is empty
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Final Total -->
+                    <div class="d-flex justify-content-between fs-4 fw-bold">
+                        <span>Final Total</span>
+                        <span class="text-pink" th:text="'৳ ' + ${total} ?: '৳ 0'">৳ 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

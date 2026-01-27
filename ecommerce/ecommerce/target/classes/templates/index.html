@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ? ${title} : 'MyShop - Online Shopping'">MyShop - Online Shopping</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+        --primary: #ff69b4;
+        --primary-dark: #ff1493;
+        --dark: #111;
+        --gray: #555;
+        --light: #fff5f8;
+        }
+        body {
+        background: var(--light);
+        min-height: 100vh;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: var(--dark);
+        margin: 0;
+        position: relative;
+        }
+
+        /* Navbar */
+        .navbar {
+        background: white !important;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 1.2rem 0;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        .navbar-brand {
+        font-weight: 800;
+        font-size: 2.1rem;
+        color: var(--dark) !important;
+        }
+        .nav-link {
+        color: var(--gray) !important;
+        font-weight: 500;
+        margin: 0 1.2rem;
+        transition: color 0.3s;
+        }
+        .nav-link:hover {
+        color: var(--primary) !important;
+        }
+        .logout-btn {
+        background: linear-gradient(45deg, #ff4757, #ff6b81);
+        color: white !important;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(255,71,87,0.3);
+        }
+        .logout-btn:hover {
+        background: linear-gradient(45deg, #ff6b81, #ff4757);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255,71,87,0.5);
+        }
+
+        /* Sidebar */
+        .sidebar-toggler {
+        background: var(--primary);
+        color: white;
+        border: none;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        font-size: 1.8rem;
+        box-shadow: 0 6px 18px rgba(255,105,180,0.35);
+        transition: all 0.3s;
+        z-index: 1001;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        }
+        .sidebar-toggler:hover {
+        transform: scale(1.12);
+        box-shadow: 0 10px 25px rgba(255,105,180,0.5);
+        }
+
+        .sidebar {
+        height: 100vh;
+        width: 340px;
+        position: fixed;
+        top: 0;
+        left: -340px;
+        background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+        transition: left 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        z-index: 1000;
+        overflow-y: auto;
+        padding-top: 90px;
+        box-shadow: 10px 0 40px rgba(0,0,0,0.35);
+        opacity: 0;
+        }
+        .sidebar.open {
+        left: 0;
+        opacity: 1;
+        }
+        .sidebar .nav-link {
+        color: white !important;
+        padding: 22px 40px;
+        font-size: 1.35rem;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+        transition: all 0.5s ease;
+        opacity: 0;
+        transform: translateX(-40px) scale(0.95);
+        }
+        .sidebar.open .nav-link {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        }
+
+        /* Hero */
+        .hero {
+        min-height: 50vh;
+        background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.55)),
+        url('https://images.unsplash.com/photo-1558769132-cb1aea458c5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        position: relative;
+        }
+        .hero-content {
+        max-width: 700px;
+        padding: 0 1.5rem;
+        opacity: 0;
+        transform: translateY(50px);
+        animation: fadeInUp 1.2s ease forwards 0.4s;
+        }
+        @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+        }
+        .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 900;
+        letter-spacing: -2px;
+        margin-bottom: 1rem;
+        }
+        .hero p {
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        }
+        .btn-hero {
+        background: white;
+        color: var(--dark);
+        font-weight: 700;
+        padding: 0.8rem 2.5rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        transition: all 0.4s;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .btn-hero:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-6px);
+        }
+
+        /* Categories */
+        .category-section {
+        padding: 4rem 0;
+        background: white;
+        }
+        .category-card {
+        border-radius: 50%;
+        width: 180px;
+        height: 180px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.4s;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: 0 auto;
+        }
+        .category-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 50px rgba(255,105,180,0.3);
+        }
+        .category-icon {
+        font-size: 3.5rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        }
+        .category-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--dark);
+        }
+
+        /* Products */
+        .products-section {
+        padding: 4rem 0;
+        }
+        .product-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        height: 320px;
+        }
+        .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(255,105,180,0.25);
+        }
+        .product-img {
+        height: 180px;
+        object-fit: cover;
+        }
+        .product-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        }
+        .product-price {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--primary);
+        }
+        .add-to-cart-btn {
+        font-size: 0.9rem;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        }
+        .add-to-cart-btn:hover {
+        transform: scale(1.08);
+        box-shadow: 0 5px 15px rgba(255,105,180,0.3);
+        }
+        .add-to-cart-btn:active {
+        transform: scale(0.92);
+        }
+        .ripple {
+        position: absolute;
+        background: rgba(255,255,255,0.4);
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        pointer-events: none;
+        }
+        @keyframes ripple {
+        to { transform: scale(4); opacity: 0; }
+        }
+
+        /* Floating Chatbot Button */
+        .chatbot-float {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 70px;
+        height: 70px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        font-size: 2rem;
+        box-shadow: 0 10px 30px rgba(255,105,180,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1000;
+        transition: all 0.3s;
+        }
+        .chatbot-float:hover {
+        transform: scale(1.15);
+        box-shadow: 0 15px 40px rgba(255,105,180,0.5);
+        }
+
+        /* Chatbox */
+        .chatbox {
+        position: fixed;
+        bottom: 110px;
+        right: 30px;
+        width: 360px;
+        height: 520px;
+        background: white;
+        border-radius: 15px 15px 0 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        display: none;
+        z-index: 999;
+        overflow: hidden;
+        flex-direction: column;
+        }
+        .chatbox-header {
+        background: var(--primary);
+        color: white;
+        padding: 14px 18px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.1rem;
+        }
+        .chatbox-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px;
+        background: #e5ddd5;
+        display: flex;
+        flex-direction: column;
+        }
+        .chatbox-body .message {
+        margin: 8px 0;
+        padding: 10px 14px;
+        border-radius: 18px;
+        max-width: 80%;
+        line-height: 1.4;
+        word-wrap: break-word;
+        font-size: 0.98rem;
+        }
+        .chatbox-body .message.user {
+        background: #dcf8c6;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+        }
+        .chatbox-body .message.bot {
+        background: white;
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+        }
+        .chatbox-input {
+        padding: 12px 16px;
+        border-top: 1px solid #ddd;
+        background: #f0f2f5;
+        display: flex;
+        gap: 10px;
+        }
+        .chatbox-input input {
+        flex: 1;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 25px;
+        font-size: 1rem;
+        }
+        .chatbox-input button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+
+        /* Footer */
+        .footer {
+        background: var(--dark);
+        color: #ccc;
+        padding: 4rem 0 2rem;
+        text-align: center;
+        }
+        .footer a {
+        color: #aaa;
+        text-decoration: none;
+        margin: 0 1.2rem;
+        transition: color 0.3s;
+        }
+        .footer a:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar Toggler -->
+<button class="sidebar-toggler position-fixed top-0 start-0 m-4" onclick="toggleSidebar()">☰</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <nav class="nav flex-column">
+        <a class="nav-link" href="/category/Women's Fashion">👗 Women's Fashion</a>
+        <a class="nav-link" href="/category/Men's Fashion">👔 Men's Fashion</a>
+        <a class="nav-link" href="/category/Electronics">📱 Electronics</a>
+        <a class="nav-link" href="/category/Beauty">💄 Beauty</a>
+        <a class="nav-link" href="/category/Home & Living">🏠 Home & Living</a>
+        <a class="nav-link" href="/category/Mobile Phones">📲 Mobile Phones</a>
+        <a class="nav-link" href="/category/Laptops">💻 Laptops</a>
+        <a class="nav-link" href="/category/Books">📚 Books</a>
+        <a class="nav-link" href="/category/Groceries">🛒 Groceries</a>
+    </nav>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">MyShop</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-4">
+                <li class="nav-item">
+                    <a class="nav-link btn btn-light position-relative px-4" href="/cart">
+                        🛒 Cart <span id="cart-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-light position-relative px-4" href="/chat">
+                        💬 Chat Bot
+                    </a>
+                </li>
+
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link btn btn-light position-relative px-4" href="/wishlist">
+                        ❤️ Wishlist <span id="wishlist-badge" class="badge bg-danger position-absolute top-0 start-100 translate-middle">0</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <div sec:authorize="isAuthenticated()">
+                        <span class="text-dark fw-bold me-3">Hi, <span sec:authentication="name"></span>!</span>
+                        <a href="/myprofile" class="btn btn-sm btn-outline-primary px-4 rounded-pill me-2">
+                            <i class="fas fa-user me-1"></i> Profile
+                        </a>
+                        <a href="/logout" class="btn btn-sm btn-danger px-4 rounded-pill">Logout</a>
+                    </div>
+                    <div sec:authorize="!isAuthenticated()">
+                        <a href="/login" class="btn btn-outline-dark btn-sm px-4 me-2 rounded-pill">Login</a>
+                        <a href="/register" class="btn btn-outline-dark btn-sm px-4 rounded-pill">Register</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section - একদম মাঝে নিয়ে আসা + ছোট + সেন্টার গ্যারান্টি -->
+<div class="hero d-flex align-items-center justify-content-center text-center" style="min-height: 50vh; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1558769132-cb1aea458c5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed; color: white; position: relative;">
+    <div class="container">
+        <div class="hero-content mx-auto" style="max-width: 700px; padding: 0 15px;">
+            <h1 class="display-5 fw-bold mb-3" style="font-size: 3.5rem;">Welcome to MyShop</h1>
+            <p class="lead mb-4 fs-5">Your favorite online shopping destination in Bangladesh!</p>
+            <form class="d-flex justify-content-center mx-auto search-form" th:action="@{/search}" method="get" style="max-width: 500px;">
+                <input class="form-control me-1 rounded-pill py-2 fs-5 shadow-lg" type="search" name="query" placeholder="Search your favorite products..." th:value="${searchQuery}" style="height: 50px;">
+                <button class="btn btn-light rounded-pill px-4 py-2 fw-bold shadow-lg fs-5" type="submit" style="height: 50px;">
+                    Search
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Categories Section -->
+<div class="category-section py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5" style="font-size: 2.8rem; color: var(--primary-dark);">Shop by Category</h2>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4 justify-content-center">
+            <!-- Women's Fashion -->
+            <div class="col">
+                <a th:href="@{/category/Women's Fashion}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-female"></i></div>
+                        <div class="category-name">Women's Fashion</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Men's Fashion -->
+            <div class="col">
+                <a th:href="@{/category/Men's Fashion}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-male"></i></div>
+                        <div class="category-name">Men's Fashion</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Electronics -->
+            <div class="col">
+                <a th:href="@{/category/Electronics}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <div class="category-name">Electronics</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Beauty -->
+            <div class="col">
+                <a th:href="@{/category/Beauty}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-lips"></i></div>
+                        <div class="category-name">Beauty</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Home & Living -->
+            <div class="col">
+                <a th:href="@{/category/Home & Living}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-home"></i></div>
+                        <div class="category-name">Home & Living</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Mobile Phones -->
+            <div class="col">
+                <a th:href="@{/category/Mobile Phones}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-mobile"></i></div>
+                        <div class="category-name">Mobile Phones</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Laptops -->
+            <div class="col">
+                <a th:href="@{/category/Laptops}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-laptop"></i></div>
+                        <div class="category-name">Laptops</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Books -->
+            <div class="col">
+                <a th:href="@{/category/Books}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-book"></i></div>
+                        <div class="category-name">Books</div>
+                    </div>
+                </a>
+            </div>
+            <!-- Groceries -->
+            <div class="col">
+                <a th:href="@{/category/Groceries}" class="text-decoration-none">
+                    <div class="category-card shadow-lg">
+                        <div class="category-icon"><i class="fas fa-shopping-cart"></i></div>
+                        <div class="category-name">Groceries</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Products -->
+<div class="products-section">
+    <div class="container">
+        <h2 class="section-title" style="font-size: 2.5rem;">Featured Products</h2>
+        <div th:if="${products != null and !#lists.isEmpty(products)}" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-3">
+            <div class="col" th:each="product : ${products}">
+                <div class="card product-card h-100">
+                    <a th:href="@{/product/{id}(id=${product.id})}">
+                        <img th:src="${product.imageUrl}" class="card-img-top product-img" alt="Product">
+                    </a>
+                    <div class="card-body text-center">
+                        <h5 class="product-title" th:text="${product.name}">Product Name</h5>
+                        <p class="product-price">৳ <span th:text="${product.price}">0</span></p>
+                        <button type="button" class="btn btn-pink add-to-cart-btn w-100 rounded-pill"
+                                th:data-id="${product.id}" th:disabled="${product.stock <= 0}">
+                            <span th:if="${product.stock <= 0}">Out of Stock</span>
+                            <span th:unless="${product.stock <= 0}">Add to Cart</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${products == null or #lists.isEmpty(products)}" class="text-center py-5">
+            <h3 class="text-muted mb-4 display-6">No products found.</h3>
+            <a href="/" class="btn btn-pink btn-lg rounded-pill px-5">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Chatbot Button -->
+<button class="chatbot-float" onclick="toggleChatbox()">
+    <i class="fas fa-comment-dots"></i>
+</button>
+
+<!-- Chatbox - Stock Bot -->
+<div class="chatbox" id="chatbox">
+    <div class="chatbox-header">
+        <span>Chat with Stock Bot</span>
+        <button class="btn-close btn-close-white" onclick="toggleChatbox()"></button>
+    </div>
+    <div class="chatbox-body" id="chatBody">
+        <div class="message bot">হাই! 👋 কোনো প্রোডাক্টের স্টক জানতে চাইলে বলুন (যেমন: Summer Dress আছে কি?)</div>
+    </div>
+    <div class="chatbox-input">
+        <input type="text" id="chatInput" placeholder="প্রোডাক্টের নাম লিখুন..." autofocus>
+        <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<!-- WebSocket Libraries -->
+<script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.3-1/stomp.min.js"></script>
+
+<script>
+    // Sidebar Toggle
+    function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // Chatbox Toggle
+    function toggleChatbox() {
+    const chatbox = document.getElementById('chatbox');
+    const isVisible = chatbox.style.display === 'flex';
+    chatbox.style.display = isVisible ? 'none' : 'flex';
+    if (!isVisible) {
+    document.getElementById('chatInput').focus();
+    }
+    }
+
+    // WebSocket for Stock Bot
+    var socket = new SockJS('/ws');
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+    console.log('WebSocket Connected:', frame);
+
+    stompClient.subscribe('/topic/chat', function (response) {
+    var message = response.body;
+    showMessage(message, 'bot');
+    });
+    }, function (error) {
+    console.error('Connection error:', error);
+    showMessage("কানেকশন হারিয়েছে। পেজ রিফ্রেশ করুন।", 'bot');
+    });
+
+    function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    showMessage(message, 'user');
+    input.value = '';
+
+    if (stompClient && stompClient.connected) {
+    stompClient.send("/app/chat", {}, message);
+    } else {
+    showMessage("কানেকশন হচ্ছে... দয়া করে অপেক্ষা করুন।", 'bot');
+    }
+    }
+
+    function showMessage(text, sender) {
+    const chat = document.getElementById('chatBody');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'message ' + sender;
+    msgDiv.textContent = text;
+    chat.appendChild(msgDiv);
+    chat.scrollTop = chat.scrollHeight;
+    }
+
+    document.getElementById('chatInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
+    }
+    });
+
+    // Cart Badge Update
+    function updateCartBadge() {
+    fetch('/cart/count')
+    .then(response => response.text())
+    .then(data => {
+    const badge = document.getElementById('cart-badge');
+    const count = parseInt(data) || 0;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+    });
+    }
+
+    // Add to Cart with Ripple
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (this.disabled) return;
+
+    const productId = this.dataset.id;
+
+    // Ripple effect
+    const rect = this.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.classList.add('ripple');
+    ripple.style.left = `${e.clientX - rect.left}px`;
+    ripple.style.top = `${e.clientY - rect.top}px`;
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+
+    // Temporary success animation
+    const originalText = this.innerHTML;
+    this.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
+    this.classList.add('btn-success');
+    this.disabled = true;
+
+    fetch('/cart/add/' + productId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => {
+    if (response.ok) {
+    updateCartBadge();
+    setTimeout(() => {
+    this.innerHTML = originalText;
+    this.classList.remove('btn-success');
+    this.disabled = false;
+    }, 1500);
+    } else {
+    this.innerHTML = originalText;
+    this.classList.remove('btn-success');
+    this.disabled = false;
+    alert('Failed to add to cart');
+    }
+    })
+    .catch(err => {
+    this.innerHTML = originalText;
+    this.classList.remove('btn-success');
+    this.disabled = false;
+    console.log('Add to cart error:', err);
+    alert('Something went wrong');
+    });
+    });
+    });
+
+    // Wishlist Badge (localStorage)
+    function updateWishlistBadge() {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    const badge = document.getElementById('wishlist-badge');
+    if (badge) {
+    const count = wishlist.length;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+    updateCartBadge();
+    updateWishlistBadge();
+    });
+</script>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <p class="mb-2">© 2026 MyShop. All rights reserved.</p>
+        <p class="small">
+            <a href="/about">About Us</a> •
+            <a href="/contact">Contact</a> •
+            <a href="/privacy">Privacy Policy</a> •
+            <a href="/terms">Terms of Service</a>
+        </p>
+    </div>
+</footer>
+
+<script src="/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

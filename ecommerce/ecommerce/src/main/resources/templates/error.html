@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error - MyShop</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container my-5 text-center">
+    <h1 class="text-danger mb-4">দুঃখিত! কোনো সমস্যা হয়েছে</h1>
+
+    <div class="alert alert-info">
+        <strong>সময়:</strong> <span th:text="${timestamp}"></span><br>
+        <strong>পেজ:</strong> <span th:text="${url}"></span><br>
+        <strong>সমস্যার ধরন:</strong> <span th:text="${errorType}"></span>
+    </div>
+
+    <div class="alert alert-warning mt-4">
+        <strong>বিস্তারিত:</strong> <span th:text="${errorMessage}"></span>
+    </div>
+
+    <p class="mt-4">দয়া করে পরে আবার চেষ্টা করুন বা <a href="/contact">সাপোর্টে যোগাযোগ করুন</a></p>
+
+    <a href="/" class="btn btn-primary btn-lg mt-3">হোমে ফিরে যান</a>
+</div>
+</body>
+</html>

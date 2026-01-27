@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Group Buy Order Success - MyShop</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #f0f8ff, #e6f3ff); }
+        .success-card { max-width: 700px; margin: auto; border: 2px solid #28a745; }
+        .group-icon { font-size: 6rem; }
+    </style>
+</head>
+<body>
+<div class="container my-5">
+    <div class="card success-card text-center p-5 shadow-lg">
+        <div class="group-icon mb-4">🎉👥</div>
+        <h1 class="text-success mb-4">গ্রুপ বাই অর্ডার সফল!</h1>
+
+        <div class="alert alert-success fs-5">
+            <p th:text="${message}">গ্রুপ বাই অর্ডার সফলভাবে প্লেস হয়েছে!</p>
+            <p>আপনার গ্রুপের সকল সদস্যের অর্ডার কনফার্ম হয়েছে।</p>
+            <p class="mt-3">শীঘ্রই ডেলিভারি শুরু হবে। গ্রুপের সবাইকে শেয়ার করুন!</p>
+        </div>
+
+        <div class="mt-5">
+            <a href="/" class="btn btn-primary btn-lg px-5">হোমে ফিরে যান</a>
+            <a href="/group-buy" class="btn btn-outline-success btn-lg px-5 ms-3">আরও গ্রুপ দেখুন</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

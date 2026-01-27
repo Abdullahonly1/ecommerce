@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product?.name} + ' - Group Buy - MyShop' ?: 'Group Buy - MyShop'">Group Buy - MyShop</title>
+    <link href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff69b4;
+            --primary-dark: #ff1493;
+            --success: #28a745;
+            --success-dark: #20c997;
+            --light: #fff5f8;
+            --dark: #1a1a1a;
+            --gray: #555;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fff5f8, #ffeef5);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark)) !important;
+            box-shadow: 0 6px 25px rgba(255,105,180,0.35);
+            padding: 1.3rem 0;
+        }
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 2.3rem;
+            color: white !important;
+        }
+
+        .container-main {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .group-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(255,105,180,0.2);
+            border: none;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .group-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(255,105,180,0.3);
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .progress {
+            height: 30px;
+            border-radius: 15px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, var(--success), var(--success-dark));
+            transition: width 1s ease;
+        }
+
+        .btn-pink {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            border: none;
+            font-size: 1.3rem;
+            padding: 14px 40px;
+            border-radius: 50px;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(255,105,180,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-pink:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(255,105,180,0.45);
+        }
+        .btn-pink:active {
+            transform: scale(0.96);
+        }
+
+        .btn-success-custom {
+            background: linear-gradient(45deg, var(--success), var(--success-dark));
+            border: none;
+            font-size: 1.3rem;
+            padding: 14px 40px;
+            border-radius: 50px;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(40,167,69,0.3);
+        }
+        .btn-success-custom:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(40,167,69,0.45);
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        .alert-login {
+            background: rgba(255,193,7,0.15);
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 3rem auto;
+        }
+
+        h1, h3, h4 {
+            text-shadow: 0 2px 10px rgba(255,105,180,0.2);
+        }
+
+        .badge-progress {
+            font-size: 1.4rem;
+            padding: 12px 24px;
+            border-radius: 50px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark shadow">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" href="/">MyShop</a>
+        <a class="btn btn-light px-4" th:href="@{/product/{id}(id=${groupBuy?.product?.id} ?: '')}">
+            <i class="fas fa-arrow-left me-2"></i> Back to Product
+        </a>
+    </div>
+</nav>
+
+<!-- লগইন না থাকলে -->
+<div th:unless="${#authorization.expression('isAuthenticated()')}" class="alert-login text-center my-5 mx-auto">
+    <h4 class="mb-3 fw-bold text-warning">লগইন করুন!</h4>
+    <p class="lead mb-4">Group Buy-তে জয়েন করতে বা নিজের গ্রুপ শুরু করতে লগইন করা আবশ্যক।</p>
+
+    <a th:href="@{/login(nextUrl=${#httpServletRequest.requestURI})}" class="btn btn-pink btn-lg px-5">
+        <i class="fas fa-sign-in-alt me-2"></i> এখনই লগইন করুন
+    </a>
+
+    <p class="mt-4">অ্যাকাউন্ট নেই? <a href="/register" class="text-primary fw-bold">রেজিস্টার করুন</a></p>
+</div>
+
+<!-- লগইন থাকলে পুরো কনটেন্ট -->
+<div th:if="${#authorization.expression('isAuthenticated()')}" class="container-main my-5">
+    <div class="group-card mx-auto">
+        <div class="card-header">
+            <h1 class="fw-bold mb-0">Group Buy Offer 🔥</h1>
+            <p class="lead mt-2 mb-0">বন্ধুদের সাথে মিলে ১৫% ছাড় পান!</p>
+        </div>
+
+        <div class="card-body p-5">
+            <!-- প্রোডাক্ট নাম + null-safe -->
+            <h3 class="text-center mb-4 fw-bold text-primary" th:if="${groupBuy?.product != null}" th:text="${groupBuy.product.name} ?: 'Product Name'">Product Name</h3>
+            <h3 class="text-danger text-center mb-4" th:unless="${groupBuy?.product != null}">Product information not available</h3>
+
+            <!-- ইমেজ -->
+            <div class="text-center mb-5">
+                <img th:if="${groupBuy?.product?.imageUrl != null}"
+                     th:src="${groupBuy.product.imageUrl}"
+                     class="img-fluid rounded shadow-lg" style="max-height: 350px;"
+                     alt="Product">
+            </div>
+
+            <!-- Progress Section -->
+            <div class="text-center mb-5">
+                <h4 class="mb-3 fw-bold">Group Progress</h4>
+
+                <div class="progress mx-auto mb-3" style="max-width: 500px;">
+                    <div class="progress-bar" role="progressbar"
+                         th:style="'width: ' + (${groupBuy != null and groupBuy.participantCount != null and groupBuy.requiredMembers != null} ? (${groupBuy.participantCount / groupBuy.requiredMembers * 100} + '%') : '0%')"
+                         th:aria-valuenow="${groupBuy?.participantCount ?: 0}"
+                         aria-valuemin="0" aria-valuemax="${groupBuy?.requiredMembers ?: 4}"></div>
+                </div>
+
+                <span class="badge badge-progress bg-warning text-dark fs-5 px-4 py-2"
+                      th:if="${groupBuy != null and groupBuy.participantCount < groupBuy.requiredMembers}"
+                      th:text="${groupBuy.participantCount} + ' / ' + ${groupBuy.requiredMembers} + ' Joined'">0 / 4 Joined</span>
+
+                <span class="badge badge-progress bg-success fs-5 px-4 py-2"
+                      th:if="${groupBuy != null and groupBuy.participantCount >= groupBuy.requiredMembers}"
+                      th:text="'🎉 ' + ${groupBuy.participantCount} + ' Joined - Full!'">🎉 4 Joined - Full!</span>
+
+                <p class="text-muted mt-3" th:if="${groupBuy != null and groupBuy.participantCount < groupBuy.requiredMembers}">
+                    Need <strong th:text="${groupBuy.requiredMembers - groupBuy.participantCount} ?: 0">0</strong> more friends!
+                </p>
+            </div>
+
+            <!-- Share Link -->
+            <div class="mt-4" th:if="${groupBuy != null and groupBuy.groupLink != null}">
+                <label class="form-label fw-bold">Share This Link & Invite Friends</label>
+                <div class="input-group mb-3">
+                    <input type="text" id="shareLink" class="form-control text-center" readonly
+                           th:value="${groupBuy.fullJoinLink} ?: @{'http://localhost:8080/group-buy/join/' + ${groupBuy.groupLink} + '?productId=' + ${groupBuy.product?.id ?: ''}}">
+                    <button class="btn btn-pink" type="button" onclick="copyLink()">
+                        <i class="fas fa-copy me-2"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Join Button -->
+            <button id="joinBtn" class="btn btn-success-custom btn-lg w-100 mb-4" onclick="joinGroup()">
+                <i class="fas fa-users me-2"></i> Join This Group Buy Now
+            </button>
+
+            <!-- Group Full Message -->
+            <p th:if="${groupBuy != null and groupBuy.participantCount >= groupBuy.requiredMembers}"
+               class="text-success text-center fs-4 fw-bold mb-4 animate__animated animate__pulse animate__infinite">
+                🎉 Group Full! 15% Discount Unlocked for Everyone!
+            </p>
+
+            <!-- Order Button -->
+            <div th:if="${groupBuy != null and groupBuy.participantCount >= groupBuy.requiredMembers}" class="mt-4">
+                <form th:action="@{/group-buy/order/{id}(id=${groupBuy?.id})}" method="post">
+                    <input type="hidden" name="groupBuyId" th:value="${groupBuy?.id}" />
+                    <button type="submit" class="btn btn-success-custom btn-lg w-100">
+                        <i class="fas fa-shopping-cart me-2"></i> অর্ডার করুন (15% ডিসকাউন্ট)
+                    </button>
+                </form>
+            </div>
+
+            <!-- গ্রুপ না থাকলে -->
+            <p class="text-danger text-center mt-4 fs-5" th:if="${groupBuy == null}">
+                গ্রুপ পাওয়া যায়নি বা লোড হয়নি। দয়া করে আবার চেষ্টা করুন।
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyLink() {
+        const link = document.getElementById('shareLink');
+        if (link) {
+            link.select();
+            document.execCommand('copy');
+            alert('লিঙ্ক কপি হয়েছে! বন্ধুদের সাথে শেয়ার করুন ❤️');
+        }
+    }
+
+    function joinGroup() {
+        const link = window.location.pathname.split('/join/')[1] || '';
+        if (!link) {
+            alert('URL-এ কোনো গ্রুপ লিঙ্ক পাওয়া যায়নি');
+            return;
+        }
+
+        fetch('/group-buy/join/' + link, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('আপনি গ্রুপে জয়েন করেছেন! পেজ রিফ্রেশ হচ্ছে...');
+                window.location.reload();
+            } else {
+                return response.text().then(text => {
+                    alert('এরর: ' + (text || 'জয়েন করা যায়নি'));
+                });
+            }
+        })
+        .catch(err => {
+            alert('কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+        });
+    }
+
+    // Ripple effect on all buttons
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            ripple.style.left = `${e.clientX - rect.left}px`;
+            ripple.style.top = `${e.clientY - rect.top}px`;
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+</script>
+
+</body>
+</html>
